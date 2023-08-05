@@ -2,9 +2,10 @@ package web.member.service;
 
 import java.util.List;
 
+import core.service.CoreService;
 import web.member.pojo.Member;
 
-public interface MemberService {
+public interface MemberService extends CoreService {
 
 	Member register(Member member);
 

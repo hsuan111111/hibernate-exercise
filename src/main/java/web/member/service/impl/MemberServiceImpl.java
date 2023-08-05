@@ -16,6 +16,9 @@ public class MemberServiceImpl implements MemberService {
 	
 	@Override
 	public Member register(Member member) {
+		
+		
+		
 		if (member.getUsername() == null) {
 			member.setMessage("使用者名稱未輸入");
 			member.setSuccessful(false);
@@ -34,23 +37,36 @@ public class MemberServiceImpl implements MemberService {
 			return member;
 		}
 		
-		if (dao.selectByUsername(member.getUsername()) != null) {
-			member.setMessage("帳號重複");
-			member.setSuccessful(false);
+		try {
+			beginTransaction();
+			if (dao.selectByUsername(member.getUsername()) != null) {
+				member.setMessage("帳號重複");
+				member.setSuccessful(false);
+				rollback();
+				return member;
+			}
+			
+			member.setRoleId(2);
+			final int resultCount = dao.insert(member);
+			if (resultCount < 1) {
+				member.setMessage("註冊錯誤，請聯絡管理員!");
+				member.setSuccessful(false);
+				rollback();
+				return member;
+			}
+			
+			member.setMessage("註冊成功");
+			member.setSuccessful(true);
+			commit();
 			return member;
-		}
-		
-		member.setRoleId(2);
-		final int resultCount = dao.insert(member);
-		if (resultCount < 1) {
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 			member.setMessage("註冊錯誤，請聯絡管理員!");
 			member.setSuccessful(false);
+			rollback();
 			return member;
 		}
-		
-		member.setMessage("註冊成功");
-		member.setSuccessful(true);
-		return member;
 	}
 
 	@Override
@@ -102,7 +118,17 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public boolean remove(Integer id) {
-		return dao.deleteById(id) > 0;
+		try {
+			beginTransaction();
+			final int resultCount = dao.deleteById(id);
+			commit();
+			return dao.deleteById(id) > 0;
+		} catch (Exception e) {
+			e.printStackTrace();
+			rollback();
+			return false;
+		}
+		
 	}
 
 	@Override

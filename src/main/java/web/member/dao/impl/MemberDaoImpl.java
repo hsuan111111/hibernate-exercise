@@ -8,6 +8,10 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Column;
+
+import org.hibernate.Session;
+
 import web.member.dao.MemberDao;
 import web.member.pojo.Member;
 
@@ -15,33 +19,42 @@ public class MemberDaoImpl implements MemberDao {
 
 	@Override
 	public int insert(Member member) {
-		final String sql = "insert into MEMBER(USERNAME, PASSWORD, NICKNAME, ROLE_ID) " + "values(?, ?, ?, ?)";
-		try (
-			Connection conn = getConnection();
-			PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setString(1, member.getUsername());
-			pstmt.setString(2, member.getPassword());
-			pstmt.setString(3, member.getNickname());
-			pstmt.setInt(4, member.getRoleId());
-			return pstmt.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return -1;
+		getSession().persist(member);
+		return 1;
+		
+//		final String sql = "insert into MEMBER(USERNAME, PASSWORD, NICKNAME, ROLE_ID) " + "values(?, ?, ?, ?)";
+//		try (
+//			Connection conn = getConnection();
+//			PreparedStatement pstmt = conn.prepareStatement(sql)) {
+//			pstmt.setString(1, member.getUsername());
+//			pstmt.setString(2, member.getPassword());
+//			pstmt.setString(3, member.getNickname());
+//			pstmt.setInt(4, member.getRoleId());
+//			return pstmt.executeUpdate();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return -1;
 	}
 
 	@Override
 	public int deleteById(Integer id) {
-		final String sql = "delete from MEMBER where ID = ?";
-		try (
-			Connection conn = getConnection();
-			PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setInt(1, id);
-			return pstmt.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return -1;
+		Session session = getSession();//先查詢
+		Member member = session.get(Member.class, id);
+		session.remove(member);//再刪除
+		return 1;
+		
+		
+//		final String sql = "delete from MEMBER where ID = ?";
+//		try (
+//			Connection conn = getConnection();
+//			PreparedStatement pstmt = conn.prepareStatement(sql)) {
+//			pstmt.setInt(1, id);
+//			return pstmt.executeUpdate();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return -1;
 	}
 
 	@Override
@@ -81,32 +94,33 @@ public class MemberDaoImpl implements MemberDao {
 
 	@Override
 	public Member selectById(Integer id) {
-		final String sql = "select * from MEMBER where ID = ?";
-		try (
-			Connection conn = getConnection();
-			PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setInt(1, id);
-			try (
-				ResultSet rs = pstmt.executeQuery()) {
-				if (rs.next()) {
-					Member member = new Member();
-					member.setId(rs.getInt("ID"));
-					member.setUsername(rs.getString("USERNAME"));
-					member.setPassword(rs.getString("PASSWORD"));
-					member.setNickname(rs.getString("NICKNAME"));
-					member.setPass(rs.getBoolean("PASS"));
-					member.setRoleId(rs.getInt("ROLE_ID"));
-					member.setCreator(rs.getString("CREATOR"));
-					member.setCreatedDate(rs.getTimestamp("CREATED_DATE"));
-					member.setUpdater(rs.getString("UPDATER"));
-					member.setLastUpdatedDate(rs.getTimestamp("LAST_UPDATED_DATE"));
-					return member;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+		return getSession().get(Member.class, id);
+//		final String sql = "select * from MEMBER where ID = ?";
+//		try (
+//			Connection conn = getConnection();
+//			PreparedStatement pstmt = conn.prepareStatement(sql)) {
+//			pstmt.setInt(1, id);
+//			try (
+//				ResultSet rs = pstmt.executeQuery()) {
+//				if (rs.next()) {
+//					Member member = new Member();
+//					member.setId(rs.getInt("ID"));
+//					member.setUsername(rs.getString("USERNAME"));
+//					member.setPassword(rs.getString("PASSWORD"));
+//					member.setNickname(rs.getString("NICKNAME"));
+//					member.setPass(rs.getBoolean("PASS"));
+//					member.setRoleId(rs.getInt("ROLE_ID"));
+//					member.setCreator(rs.getString("CREATOR"));
+//					member.setCreatedDate(rs.getTimestamp("CREATED_DATE"));
+//					member.setUpdater(rs.getString("UPDATER"));
+//					member.setLastUpdatedDate(rs.getTimestamp("LAST_UPDATED_DATE"));
+//					return member;
+//				}
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return null;
 	}
 
 	@Override
