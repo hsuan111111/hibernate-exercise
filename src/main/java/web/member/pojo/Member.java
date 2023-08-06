@@ -38,6 +38,12 @@ public class Member extends Core {
 	private String updater;
 	@Column(name = "LAST_UPDATED_DATE", insertable = false)
 	private Timestamp lastUpdatedDate;
+	
+	public Member(String username, String nickname) {
+		super();
+		this.username = username;
+		this.nickname = nickname;
+	}
 
 	
 }
